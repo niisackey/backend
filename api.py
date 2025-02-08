@@ -7,8 +7,10 @@ from datetime import datetime, timedelta
 from typing import Optional  # Fix for Python versions below 3.10
 
 # ✅ Ensure `db_utils.py` is found (Adds the POS root directory to `sys.path`)
-ROOT_DIR = Path(__file__).resolve().parent.parent  # POS/
-sys.path.append(str(ROOT_DIR))
+root_dir = Path(__file__).parent.parent
+sys.path.insert(0, str(root_dir))
+
+from db_utils import get_mysql_connection, get_sqlite_connection
 
 # ✅ Import `db_utils.py` with error handling
 try:
