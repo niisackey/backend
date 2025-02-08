@@ -12,16 +12,15 @@ from pathlib import Path
 ROOT_DIR = str(Path(__file__).resolve().parent.parent)
 sys.path.append(ROOT_DIR)
 
+try:
+    from db_utils import get_mysql_connection, get_sqlite_connection, SQLITE_DB_PATH
+    print("✅ Successfully imported db_utils!")
+except ModuleNotFoundError as e:
+    print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
+    sys.exit(1)  # Stop execution if import fails
+
 # ✅ Load environment variables
 load_dotenv()
-
-# ✅ Import database utilities
-try:
-    from db_utils import get_sqlite_connection, get_mysql_connection, SQLITE_DB_PATH
-    print("✅ Successfully imported `db_utils`!")
-except ModuleNotFoundError as e:
-    print(f"❌ ERROR: Could not import `db_utils`: {e}")
-    sys.exit(1)  # Stop execution if import fails
 
 # -------------------- SYNC FUNCTION --------------------
 def sync_sqlite_to_mysql(entity_name, fields, update_fields):
@@ -72,7 +71,7 @@ def sync_sqlite_to_mysql(entity_name, fields, update_fields):
                 print(f"❌ MySQL Insert Error for `{entity_name}`, ID `{row['id']}`: {e}")
                 mysql_conn.rollback()
 
-    except Exception as e:
+    except Exception:
         print(f"❌ Sync Error for `{entity_name}`: {traceback.format_exc()}")
 
     finally:
@@ -95,7 +94,7 @@ def auto_sync():
         
         print("✅ Auto-sync completed successfully!")
 
-    except Exception as e:
+    except Exception:
         print(f"❌ Auto-sync failed: {traceback.format_exc()}")
 
     # ✅ Schedule next sync in 2 minutes
