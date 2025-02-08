@@ -1,26 +1,17 @@
 import os
 import sys
 from pathlib import Path
+
+# ✅ Add root directory to Python path FIRST
+root_dir = Path(__file__).parent.parent  # Points to project root
+sys.path.insert(0, str(root_dir))
+
+# Now import other modules
+from db_utils import get_mysql_connection, get_sqlite_connection
 import pymysql
 import jwt
 from datetime import datetime, timedelta
-from typing import Optional  # Fix for Python versions below 3.10
-
-# ✅ Ensure `db_utils.py` is found (Adds the POS root directory to `sys.path`)
-root_dir = Path(__file__).parent.parent
-sys.path.insert(0, str(root_dir))
-
-from db_utils import get_mysql_connection, get_sqlite_connection
-
-# ✅ Import `db_utils.py` with error handling
-try:
-    from db_utils import get_mysql_connection
-    print("✅ Successfully imported `db_utils.py`!")
-except ModuleNotFoundError as e:
-    print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
-    sys.exit(1)  # Stop execution if import fails
-
-
+from typing import Optional
 from fastapi import FastAPI, HTTPException, Depends, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
