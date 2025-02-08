@@ -8,15 +8,20 @@ import atexit
 from dotenv import load_dotenv
 from pathlib import Path
 
-root_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_dir))
+# ✅ Ensure `db_utils.py` is found (Adds the POS root directory to `sys.path`)
+ROOT_DIR = str(Path(__file__).resolve().parent.parent)
+sys.path.append(ROOT_DIR)
 
-# Now import from root
-from db_utils import get_sqlite_connection, get_mysql_connection
 # ✅ Load environment variables
 load_dotenv()
 
-
+# ✅ Import database utilities
+try:
+    from db_utils import get_sqlite_connection, get_mysql_connection, SQLITE_DB_PATH
+    print("✅ Successfully imported `db_utils`!")
+except ModuleNotFoundError as e:
+    print(f"❌ ERROR: Could not import `db_utils`: {e}")
+    sys.exit(1)  # Stop execution if import fails
 
 # -------------------- SYNC FUNCTION --------------------
 def sync_sqlite_to_mysql(entity_name, fields, update_fields):
