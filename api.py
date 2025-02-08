@@ -15,6 +15,13 @@ from jose.exceptions import JWTError
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent))
 
+try:
+    from db_utils import get_sqlite_connection, get_mysql_connection, SQLITE_DB_PATH
+    print("✅ Successfully imported `db_utils`!")
+except ModuleNotFoundError as e:
+    print(f"❌ ERROR: Could not import `db_utils`: {e}")
+    sys.exit(1)  # Stop execution if import fails
+
 # Load environment variables
 load_dotenv()
 
