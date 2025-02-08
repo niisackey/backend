@@ -8,16 +8,17 @@ import atexit
 from dotenv import load_dotenv
 from pathlib import Path
 
-# ✅ Ensure `db_utils.py` is found (Adds the POS root directory to `sys.path`)
-ROOT_DIR = str(Path(__file__).resolve().parent.parent)
-sys.path.append(ROOT_DIR)
+# ✅ Set the root directory correctly
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))  # ✅ Make Python look in POS root first
 
+# ✅ Import `db_utils.py` (If this fails, the script will stop)
 try:
-    from db_utils import get_mysql_connection, get_sqlite_connection, SQLITE_DB_PATH
-    print("✅ Successfully imported db_utils!")
+    from db_utils import get_mysql_connection, get_sqlite_connection
+    print("✅ Successfully imported `db_utils.py`!")
 except ModuleNotFoundError as e:
     print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
-    sys.exit(1)  # Stop execution if import fails
+    sys.exit(1)  # Stops execution if import fails
 
 # ✅ Load environment variables
 load_dotenv()

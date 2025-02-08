@@ -2,10 +2,18 @@ import os
 import sys
 from pathlib import Path
 
-# ✅ Add root directory to Python path FIRST
-root_dir = Path(__file__).parent.parent  # Points to project root
-sys.path.insert(0, str(root_dir))
+# ✅ Set the root directory correctly
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))  # ✅ Make Python look in POS root first
 
+# ✅ Import `db_utils.py` (If this fails, the script will stop)
+try:
+    from db_utils import get_mysql_connection, get_sqlite_connection
+    print("✅ Successfully imported `db_utils.py`!")
+except ModuleNotFoundError as e:
+    print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
+    sys.exit(1)  # Stops execution if import fails
+    
 # Now import other modules
 from db_utils import get_mysql_connection, get_sqlite_connection
 import pymysql
