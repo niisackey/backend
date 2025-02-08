@@ -2,20 +2,35 @@ import os
 import sys
 from pathlib import Path
 
-# ✅ Set the root directory correctly
-ROOT_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT_DIR))  # ✅ Make Python look in POS root first
+# ✅ Absolute path resolution for both local and Render
+try:
+    # Render production path
+    render_root = Path("/opt/render/project/src")
+    if render_root.exists():
+        sys.path.insert(0, str(render_root))
+        ROOT_DIR = render_root
+    else:
+        # Local development path
+        ROOT_DIR = Path(__file__).resolve().parent.parent
+        sys.path.insert(0, str(ROOT_DIR))
+except Exception as e:
+    print(f"🚨 Path resolution error: {str(e)}")
+    sys.exit(1)
 
-# ✅ Import `db_utils.py` (If this fails, the script will stop)
+# Debugging: Show import paths
+print(f"🔍 Python Path: {sys.path}")
+print(f"📁 Root Directory Contents: {os.listdir(ROOT_DIR)}")
+
+# ✅ Import db_utils with verification
 try:
     from db_utils import get_mysql_connection, get_sqlite_connection
-    print("✅ Successfully imported `db_utils.py`!")
+    print("✅ Successfully imported db_utils!")
 except ModuleNotFoundError as e:
-    print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
-    sys.exit(1)  # Stops execution if import fails
-    
-# Now import other modules
-from db_utils import get_mysql_connection, get_sqlite_connection
+    print(f"❌ Critical Error: {str(e)}")
+    print(f"🔍 Check if db_utils.py exists at: {ROOT_DIR}/db_utils.py")
+    sys.exit(1)
+
+# Rest of your imports
 import pymysql
 import jwt
 from datetime import datetime, timedelta
@@ -191,6 +206,7 @@ async def startup_event():
     print("🚀 API has started successfully!")
 
 # -------------------- RUN API --------------------
+# ✅ CORRECTED SERVER STARTUP
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api:app", host="0.0.0.0", port=8000)
+    uvicorn.run("backend.api:app", host="0.0.0.0", port=8000)  # Changed here
