@@ -4,6 +4,12 @@ from pathlib import Path
 import pymysql
 import jwt
 from datetime import datetime, timedelta
+
+# Add root directory to Python path
+root_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(root_dir))
+
+from db_utils import get_mysql_connection
 from fastapi import FastAPI, HTTPException, Depends, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
@@ -12,17 +18,7 @@ from dotenv import load_dotenv
 from passlib.context import CryptContext
 from jose.exceptions import JWTError
 
-# Add parent directory to path
-sys.path.append(str(Path(__file__).parent.parent))
 
-try:
-    from db_utils import get_sqlite_connection, get_mysql_connection, SQLITE_DB_PATH
-    print("✅ Successfully imported `db_utils`!")
-except ModuleNotFoundError as e:
-    print(f"❌ ERROR: Could not import `db_utils`: {e}")
-    sys.exit(1)  # Stop execution if import fails
-
-# Load environment variables
 load_dotenv()
 
 # Security configurations
@@ -34,8 +30,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
-# Database connections
-from db_utils import get_mysql_connection  # Updated import
+
 
 # Initialize FastAPI app
 app = FastAPI()
