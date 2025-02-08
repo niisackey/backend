@@ -7,16 +7,17 @@ from datetime import datetime, timedelta
 from typing import Optional  # Fix for Python versions below 3.10
 
 # ✅ Ensure `db_utils.py` is found (Adds the POS root directory to `sys.path`)
-root_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(root_dir))
+ROOT_DIR = Path(__file__).resolve().parent.parent  # POS/
+sys.path.append(str(ROOT_DIR))
 
-# ✅ Import `db_utils` with error handling
+# ✅ Import `db_utils.py` with error handling
 try:
     from db_utils import get_mysql_connection
     print("✅ Successfully imported `db_utils.py`!")
 except ModuleNotFoundError as e:
     print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
     sys.exit(1)  # Stop execution if import fails
+
 
 from fastapi import FastAPI, HTTPException, Depends, Query, status
 from fastapi.middleware.cors import CORSMiddleware
