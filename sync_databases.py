@@ -8,20 +8,29 @@ import atexit
 from dotenv import load_dotenv
 from pathlib import Path
 
-# ✅ Set the root directory correctly
-ROOT_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT_DIR))  # ✅ Make Python look in POS root first
+# ✅ Deployment environment detection
+if os.getenv('RENDER'):
+    ROOT_DIR = Path("/opt/render/project/src")
+else:
+    ROOT_DIR = Path(__file__).resolve().parent.parent
 
-# ✅ Import `db_utils.py` (If this fails, the script will stop)
+sys.path.insert(0, str(ROOT_DIR))
+
 try:
-    from db_utils import get_mysql_connection, get_sqlite_connection
+    from db_utils import (
+        get_mysql_connection, 
+        get_sqlite_connection,
+        SQLITE_DB_PATH  # Added missing import
+    )
     print("✅ Successfully imported `db_utils.py`!")
-except ModuleNotFoundError as e:
-    print(f"❌ ERROR: Could not import `db_utils.py`: {e}")
-    sys.exit(1)  # Stops execution if import fails
+except (ModuleNotFoundError, ImportError) as e:
+    print(f"❌ ERROR: Could not import dependencies: {e}")
+    sys.exit(1)
 
-# ✅ Load environment variables
 load_dotenv()
+
+# ✅ Table validation
+VALID_TABLES = {"sales", "inventory", "users", "roles"}
 
 # -------------------- SYNC FUNCTION --------------------
 def sync_sqlite_to_mysql(entity_name, fields, update_fields):
