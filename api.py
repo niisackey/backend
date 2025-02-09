@@ -137,25 +137,29 @@ async def login(request: LoginRequest):
         cursor.execute("SELECT id, password, role_id FROM users WHERE username = %s", (request.username,))
         user = cursor.fetchone()
 
-        if not user or not verify_password(request.password, user["password"]):
+        print(f"🔍 User Lookup: {user}")  # ✅ Debugging
+
+        if not user:
+            print("❌ No such user found")
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+
+        if not verify_password(request.password, user["password"]):
+            print("❌ Password mismatch")
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
         cursor.execute("SELECT role_name FROM roles WHERE id = %s", (user["role_id"],))
         role = cursor.fetchone()
-        role_name = role["role_name"] if role and "role_name" in role else "User"  # ✅ Default role to "User"
+        role_name = role["role_name"] if role and "role_name" in role else "User"
 
         access_token = create_access_token(data={"sub": request.username, "role": role_name})
-        
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "role": role_name
-        }
+
+        return {"access_token": access_token, "token_type": "bearer", "role": role_name}
 
     except pymysql.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         conn.close()
+
 
 # -------------------- PROTECTED ROUTES --------------------
 @app.get("/api/reports/sales")
