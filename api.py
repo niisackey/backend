@@ -119,6 +119,12 @@ async def require_admin(user: TokenData = Depends(get_current_user)):
         )
 
 # -------------------- ROUTES --------------------
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the POS API! 🎉"}
+
+
+
 @app.post("/api/auth/login", response_model=Token)
 async def login(request: LoginRequest):
     """Authenticates a user and returns an access token."""
