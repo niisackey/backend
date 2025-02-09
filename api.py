@@ -127,38 +127,38 @@ async def root():
 
 @app.post("/api/auth/login", response_model=Token)
 async def login(request: LoginRequest):
-    """Authenticates a user and returns an access token."""
     conn = get_mysql_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Database connection failed")
-    
+
     try:
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         cursor.execute("SELECT id, password, role_id FROM users WHERE username = %s", (request.username,))
         user = cursor.fetchone()
 
-        print(f"🔍 User Lookup: {user}")  # ✅ Debugging
-
         if not user:
-            print("❌ No such user found")
+            print("❌ No such user found in MySQL")
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        if not verify_password(request.password, user["password"]):
-            print("❌ Password mismatch")
+        print(f"🔍 Stored Hash from MySQL: {user['password']}")
+        print(f"🔍 Entered Password: {request.password}")
+
+        # Debugging bcrypt password verification
+        if pwd_context.verify(request.password, user["password"]):
+            print("✅ Password verification successful!")
+        else:
+            print("❌ Password verification failed!")
+
+        if not pwd_context.verify(request.password, user["password"]):
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        cursor.execute("SELECT role_name FROM roles WHERE id = %s", (user["role_id"],))
-        role = cursor.fetchone()
-        role_name = role["role_name"] if role and "role_name" in role else "User"
-
-        access_token = create_access_token(data={"sub": request.username, "role": role_name})
-
-        return {"access_token": access_token, "token_type": "bearer", "role": role_name}
+        return {"message": "Login successful"}
 
     except pymysql.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         conn.close()
+
 
 
 # -------------------- PROTECTED ROUTES --------------------
