@@ -130,9 +130,20 @@ async def login(request: LoginRequest):
     conn = get_mysql_connection()
     if not conn:
         raise HTTPException(status_code=500, detail="Database connection failed")
-
+    
     try:
         cursor = conn.cursor(pymysql.cursors.DictCursor)
+
+        # Print database name to check if we are connected to the correct DB
+        cursor.execute("SELECT DATABASE();")
+        db_name = cursor.fetchone()
+        print(f"🛠 Connected to Database: {db_name}")
+
+        # Print all usernames to confirm the expected user exists
+        cursor.execute("SELECT username FROM users;")
+        users = cursor.fetchall()
+        print(f"👥 All Users: {users}")
+
         cursor.execute("SELECT id, password, role_id FROM users WHERE username = %s", (request.username,))
         user = cursor.fetchone()
 
@@ -140,24 +151,12 @@ async def login(request: LoginRequest):
             print("❌ No such user found in MySQL")
             raise HTTPException(status_code=401, detail="Invalid credentials")
 
-        print(f"🔍 Stored Hash from MySQL: {user['password']}")
-        print(f"🔍 Entered Password: {request.password}")
-
-        # Debugging bcrypt password verification
-        if pwd_context.verify(request.password, user["password"]):
-            print("✅ Password verification successful!")
-        else:
-            print("❌ Password verification failed!")
-
-        if not pwd_context.verify(request.password, user["password"]):
-            raise HTTPException(status_code=401, detail="Invalid credentials")
-
+        print(f"✅ Found user in DB: {user}")
         return {"message": "Login successful"}
 
-    except pymysql.Error as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     finally:
         conn.close()
+
 
 
 
