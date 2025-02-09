@@ -49,21 +49,17 @@ def get_sqlite_connection():
         return None
 
 def get_mysql_connection():
-    """Returns a connection to MySQL using environment variables."""
+    """Get MySQL connection with SSL verification"""
+    config = get_mysql_config()
     try:
         conn = pymysql.connect(
-            host=os.getenv("MYSQL_HOST"),
-            port=int(os.getenv("MYSQL_PORT", 3306)),
-            user=os.getenv("MYSQL_USER"),
-            password=os.getenv("MYSQL_PASSWORD"),
-            database="pos_system",  # ✅ Force the correct database
-            cursorclass=pymysql.cursors.DictCursor,
-            ssl={"ca": os.getenv("AIVEN_CA_CERT_PATH")} if os.getenv("USE_CLOUD_DB") == "True" else None
+            **config,
+            cursorclass=pymysql.cursors.DictCursor
         )
-        print(f"✅ Connected to MySQL at {os.getenv('MYSQL_HOST')}:{os.getenv('MYSQL_PORT')}")
+        print(f"✅ Connected to MySQL at {config['host']}:{config['port']}")
         return conn
     except pymysql.MySQLError as e:
-        print(f"❌ MySQL Connection Error: {e}")
+        print(f"❌ MySQL Connection Error: {str(e)}")
         return None
 
 # -------------------- MAIN DATABASE SWITCHER --------------------
