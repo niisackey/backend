@@ -49,14 +49,18 @@ def get_sqlite_connection():
         return None
 
 def get_mysql_connection():
-    """Get MySQL connection with SSL verification"""
-    config = get_mysql_config()
+    """Connect to MySQL **without SSL verification**"""
     try:
         conn = pymysql.connect(
-            **config,
+            host=os.getenv("AIVEN_HOST", "localhost"),
+            port=int(os.getenv("AIVEN_PORT", "3306")),
+            user=os.getenv("AIVEN_USER", "root"),
+            password=os.getenv("AIVEN_PASSWORD", ""),
+            database=os.getenv("AIVEN_DB", "defaultdb"),
+            ssl={'ssl': {'ca': None}},  # Disable SSL verification
             cursorclass=pymysql.cursors.DictCursor
         )
-        print(f"✅ Connected to MySQL at {config['host']}:{config['port']}")
+        print(f"✅ Connected to MySQL at {os.getenv('AIVEN_HOST')}")
         return conn
     except pymysql.MySQLError as e:
         print(f"❌ MySQL Connection Error: {str(e)}")
